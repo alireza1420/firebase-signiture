@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,24 +9,78 @@ import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+interface FormData {
+  consentForm: string;
+  field1Title: string;
+  field2Title: string;
+  field3Title: string;
+  field4Title: string;
+  formType: "text" | "pdf";
+  pdfFileName: string | null;
+}
+
+const initialFormData: FormData = {
+  consentForm: "",
+  field1Title: "",
+  field2Title: "",
+  field3Title: "",
+  field4Title: "",
+  formType: "text",
+  pdfFileName: null,
+};
+
 export default function AdminDashboard() {
-  const [consentForm, setConsentForm] = useState("");
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [link, setLink] = useState("");
-  const [field1Title, setField1Title] = useState("");
-  const [field2Title, setField2Title] = useState("");
-  const [field3Title, setField3Title] = useState("");
-  const [field4Title, setField4Title] = useState("");
   const { toast } = useToast();
-  const [formType, setFormType] = useState("text"); // 'text' or 'pdf'
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [pdfFileName, setPdfFileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load data from local storage on component mount
+    const storedFormData = localStorage.getItem("consentFormData");
+    if (storedFormData) {
+      setFormData(JSON.parse(storedFormData));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save data to local storage whenever formData changes
+    localStorage.setItem("consentFormData", JSON.stringify(formData));
+  }, [formData]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleFormTypeChange = (value: "text" | "pdf") => {
+    setFormData({ ...formData, formType: value });
+    if (value === "pdf") {
+      setFormData({ ...formData, consentForm: "" });
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setPdfFile(file);
+      setFormData({ ...formData, pdfFileName: file.name, consentForm: "" }); // Clear text area if PDF is uploaded
+    } else {
+      setPdfFile(null);
+      setFormData({ ...formData, pdfFileName: null });
+      toast({
+        title: "Error",
+        description: "Please upload a valid PDF file.",
+      });
+    }
+  };
 
   const generateLink = () => {
     let consentData;
 
-    if (formType === "text") {
-      consentData = consentForm;
-    } else if (formType === "pdf" && pdfFile) {
+    if (formData.formType === "text") {
+      consentData = formData.consentForm;
+    } else if (formData.formType === "pdf" && pdfFile) {
       consentData = pdfFile.name;
     } else {
       toast({
@@ -45,23 +99,6 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === "application/pdf") {
-      setPdfFile(file);
-      setPdfFileName(file.name);
-      setConsentForm(""); // Clear text area if PDF is uploaded
-    } else {
-      setPdfFile(null);
-      setPdfFileName(null);
-      toast({
-        title: "Error",
-        description: "Please upload a valid PDF file.",
-      });
-    }
-  };
-
-
   return (
     <div className="flex justify-center p-4">
       <Card className="w-full max-w-2xl">
@@ -72,15 +109,13 @@ export default function AdminDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-
           <div className="grid gap-2">
             <Label>Consent Form Type</Label>
-            <RadioGroup defaultValue="text" className="flex flex-col space-y-1" onValueChange={(value) => {
-              setFormType(value);
-              if (value === "pdf") {
-                setConsentForm("");
-              }
-            }}>
+            <RadioGroup
+              defaultValue={formData.formType}
+              className="flex flex-col space-y-1"
+              onValueChange={handleFormTypeChange}
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="text" id="text" />
                 <Label htmlFor="text">Text</Label>
@@ -92,19 +127,19 @@ export default function AdminDashboard() {
             </RadioGroup>
           </div>
 
-          {formType === "text" && (
+          {formData.formType === "text" && (
             <div className="grid gap-2">
               <label htmlFor="consentForm">Consent Form Text</label>
               <Textarea
                 id="consentForm"
                 placeholder="Paste consent form text here..."
-                value={consentForm}
-                onChange={(e) => setConsentForm(e.target.value)}
+                value={formData.consentForm}
+                onChange={handleChange}
               />
             </div>
           )}
 
-          {formType === "pdf" && (
+          {formData.formType === "pdf" && (
             <div className="grid gap-2">
               <label htmlFor="pdfUpload">Upload PDF Consent Form</label>
               <Input
@@ -113,10 +148,9 @@ export default function AdminDashboard() {
                 accept="application/pdf"
                 onChange={handleFileChange}
               />
-              {pdfFileName && <p>Selected File: {pdfFileName}</p>}
+              {formData.pdfFileName && <p>Selected File: {formData.pdfFileName}</p>}
             </div>
           )}
-
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -124,8 +158,8 @@ export default function AdminDashboard() {
               <Input
                 type="text"
                 id="field1Title"
-                value={field1Title}
-                onChange={(e) => setField1Title(e.target.value)}
+                value={formData.field1Title}
+                onChange={handleChange}
               />
             </div>
             <div>
@@ -133,8 +167,8 @@ export default function AdminDashboard() {
               <Input
                 type="text"
                 id="field2Title"
-                value={field2Title}
-                onChange={(e) => setField2Title(e.target.value)}
+                value={formData.field2Title}
+                onChange={handleChange}
               />
             </div>
             <div>
@@ -142,8 +176,8 @@ export default function AdminDashboard() {
               <Input
                 type="text"
                 id="field3Title"
-                value={field3Title}
-                onChange={(e) => setField3Title(e.target.value)}
+                value={formData.field3Title}
+                onChange={handleChange}
               />
             </div>
             <div>
@@ -151,8 +185,8 @@ export default function AdminDashboard() {
               <Input
                 type="text"
                 id="field4Title"
-                value={field4Title}
-                onChange={(e) => setField4Title(e.target.value)}
+                value={formData.field4Title}
+                onChange={handleChange}
               />
             </div>
           </div>
