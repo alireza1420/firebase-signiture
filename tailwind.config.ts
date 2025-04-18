@@ -63,7 +63,7 @@ export default {
   			}
   		},
         fontFamily: {
-            'sans': ['ui-sans-serif', 'system-ui', ...],
+            'sans': ['ui-sans-serif', 'system-ui'],
             'lato': ['Lato', 'sans-serif'],
         },
   		borderRadius: {
@@ -97,3 +97,5 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
+    
