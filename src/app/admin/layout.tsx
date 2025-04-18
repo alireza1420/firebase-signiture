@@ -1,13 +1,7 @@
 'use client';
 
-import { Metadata } from 'next';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-export const metadata: Metadata = {
-    title: 'Admin Dashboard',
-    description: 'Admin area for managing consent forms',
-};
 
 export default function AdminLayout({
                                        children,
