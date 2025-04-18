@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   const generateForm = async () => {
     let consentData;
 
-    if (!formData.formType === "text") {
+    if (formData.formType === "text") {
       consentData = formData.consentForm;
     } else if (formData.formType === "pdf" && pdfFile) {
       consentData = pdfFile.name;
@@ -102,11 +102,14 @@ export default function AdminDashboard() {
     // Save form data to Firestore
     try {
       const formsCollection = collection(db, "consentForms");
-      await addDoc(formsCollection, {
+      const formDataToSave = {
         ...formData,
         formURL: formURL,
-        createdAt: new Date(),
-      });
+        createdAt: new Date().toISOString(), // Convert Date to ISO string
+      };
+
+      await addDoc(formsCollection, formDataToSave);
+
       toast({
         title: "Form Saved",
         description: "Consent form data saved successfully.",

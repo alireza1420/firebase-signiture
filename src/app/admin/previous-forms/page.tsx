@@ -16,7 +16,7 @@ interface FormData {
     formType: "text" | "pdf";
     pdfFileName: string | null;
     formURL: string; // Changed from link to formURL
-    createdAt: Date;
+    createdAt: string;
 }
 
 export default function PreviousFormsPage() {
@@ -27,10 +27,13 @@ export default function PreviousFormsPage() {
             try {
                 const formsCollection = collection(db, "consentForms");
                 const formsSnapshot = await getDocs(formsCollection);
-                const formsList = formsSnapshot.docs.map(doc => ({
-                    ...doc.data() as FormData,
+                const formsList = formsSnapshot.docs.map(doc => {
+                  const data = doc.data() as FormData;
+                  return {
+                    ...data,
                     id: doc.id,
-                }));
+                    createdAt: new Date(data.createdAt).toLocaleDateString(), // Convert to Date object
+                }});
                 setPreviousForms(formsList);
             } catch (error) {
                 console.error("Error fetching forms from Firestore:", error);
@@ -67,6 +70,7 @@ export default function PreviousFormsPage() {
                                             {form.formURL}
                                         </Link>
                                     </p>
+                                    <p>Created At: {form.createdAt}</p>
                                     <Link href={`/admin/edit-form/${form.id}`}>Edit</Link>
                                     {/* Add more details as needed */}
                                 </li>
