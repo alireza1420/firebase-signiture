@@ -22,7 +22,7 @@ const lato = Lato({
 
 export const metadata: Metadata = {
   title: 'SignLink',
-  description: 'Secure and easy-to-use platform for collecting electronic signatures',
+  description: 'Secure platform for creating and managing consent forms.',
 };
 
 export default function RootLayout({

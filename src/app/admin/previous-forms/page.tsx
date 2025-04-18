@@ -7,6 +7,7 @@ import { collection, getDocs } from "firebase/firestore";
 import Link from 'next/link';
 
 interface FormData {
+    formName: string;
     consentForm: string;
     field1Title: string;
     field2Title: string;
@@ -53,7 +54,7 @@ export default function PreviousFormsPage() {
                         <ul>
                             {previousForms.map((form, index) => (
                                 <li key={index} className="border rounded-md p-4">
-                                    <h3 className="font-semibold">Form {index + 1}</h3>
+                                    <h3 className="font-semibold">Form {index + 1}: {form.formName}</h3>
                                     <p>Field 1 Title: {form.field1Title}</p>
                                     <p>Field 2 Title: {form.field2Title}</p>
                                     <p>Field 3 Title: {form.field3Title}</p>
@@ -66,6 +67,7 @@ export default function PreviousFormsPage() {
                                             {form.formURL}
                                         </Link>
                                     </p>
+                                    <Link href={`/admin/edit-form/${form.id}`}>Edit</Link>
                                     {/* Add more details as needed */}
                                 </li>
                             ))}

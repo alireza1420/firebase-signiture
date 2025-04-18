@@ -13,6 +13,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
 interface FormData {
+  formName: string;
   consentForm: string;
   field1Title: string;
   field2Title: string;
@@ -23,6 +24,7 @@ interface FormData {
 }
 
 const initialFormData: FormData = {
+  formName: "",
   consentForm: "",
   field1Title: "",
   field2Title: "",
@@ -81,7 +83,7 @@ export default function AdminDashboard() {
   const generateForm = async () => {
     let consentData;
 
-    if (formData.formType === "text") {
+    if (!formData.formType === "text") {
       consentData = formData.consentForm;
     } else if (formData.formType === "pdf" && pdfFile) {
       consentData = pdfFile.name;
@@ -132,6 +134,16 @@ export default function AdminDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="formName">Form Name</Label>
+            <Input
+              type="text"
+              id="formName"
+              placeholder="Enter form name..."
+              value={formData.formName}
+              onChange={handleChange}
+            />
+          </div>
           <div className="grid gap-2">
             <Label>Consent Form Type</Label>
             <RadioGroup
