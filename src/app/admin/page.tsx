@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { db } from "@/lib/firebase"; // Import Firebase Firestore
+import { collection, addDoc } from "firebase/firestore";
 
 interface FormData {
   consentForm: string;
@@ -75,7 +78,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const generateLink = () => {
+  const generateLink = async () => {
     let consentData;
 
     if (formData.formType === "text") {
@@ -97,6 +100,26 @@ export default function AdminDashboard() {
       title: "Link Generated",
       description: "Successfully generated a unique link for the consent form.",
     });
+
+    // Save form data to Firestore
+    try {
+      const formsCollection = collection(db, "consentForms");
+      await addDoc(formsCollection, {
+        ...formData,
+        link: `${window.location.origin}/form/${uuid}`,
+        createdAt: new Date(),
+      });
+      toast({
+        title: "Form Saved",
+        description: "Consent form data saved successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving form data to Firestore:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save consent form data.",
+      });
+    }
   };
 
   return (
