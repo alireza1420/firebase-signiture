@@ -1,10 +1,10 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { db } from "@/lib/firebase"; // Import Firebase Firestore
 import { collection, getDocs } from "firebase/firestore";
+import Link from 'next/link';
 
 interface FormData {
     consentForm: string;
@@ -14,7 +14,7 @@ interface FormData {
     field4Title: string;
     formType: "text" | "pdf";
     pdfFileName: string | null;
-    link: string;
+    formURL: string; // Changed from link to formURL
     createdAt: Date;
 }
 
@@ -60,7 +60,12 @@ export default function PreviousFormsPage() {
                                     <p>Field 4 Title: {form.field4Title}</p>
                                     <p>Consent Form Type: {form.formType}</p>
                                     {form.pdfFileName && <p>PDF File Name: {form.pdfFileName}</p>}
-                                    <p>Link: {form.link}</p>
+                                    <p>
+                                        Form Link:{' '}
+                                        <Link href={form.formURL} target="_blank" rel="noopener noreferrer">
+                                            {form.formURL}
+                                        </Link>
+                                    </p>
                                     {/* Add more details as needed */}
                                 </li>
                             ))}
@@ -73,4 +78,3 @@ export default function PreviousFormsPage() {
         </div>
     );
 }
-

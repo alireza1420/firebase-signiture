@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { db } from "@/lib/firebase"; // Import Firebase Firestore
 import { collection, addDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   consentForm: string;
@@ -34,9 +34,9 @@ const initialFormData: FormData = {
 
 export default function AdminDashboard() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [link, setLink] = useState("");
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Load data from local storage on component mount
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const generateLink = async () => {
+  const generateForm = async () => {
     let consentData;
 
     if (formData.formType === "text") {
@@ -93,26 +93,26 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Generate a unique link (UUID)
+    // Generate a unique id (UUID)
     const uuid = crypto.randomUUID();
-    setLink(`${window.location.origin}/form/${uuid}`);
-    toast({
-      title: "Link Generated",
-      description: "Successfully generated a unique link for the consent form.",
-    });
+    const formURL = `/form/${uuid}`;
 
     // Save form data to Firestore
     try {
       const formsCollection = collection(db, "consentForms");
       await addDoc(formsCollection, {
         ...formData,
-        link: `${window.location.origin}/form/${uuid}`,
+        formURL: formURL,
         createdAt: new Date(),
       });
       toast({
         title: "Form Saved",
         description: "Consent form data saved successfully.",
       });
+
+      // Redirect to the new form
+      router.push(formURL);
+
     } catch (error) {
       console.error("Error saving form data to Firestore:", error);
       toast({
@@ -213,18 +213,7 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          <Button onClick={generateLink}>Generate Link</Button>
-          {link && (
-            <div className="grid gap-2">
-              <label htmlFor="link">Generated Link</label>
-              <Input
-                type="text"
-                id="link"
-                value={link}
-                readOnly
-              />
-            </div>
-          )}
+          <Button onClick={generateForm}>Generate Form</Button>
         </CardContent>
       </Card>
     </div>
