@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,10 @@ export default {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+        fontFamily: {
+            'sans': ['ui-sans-serif', 'system-ui', ...],
+            'lato': ['Lato', 'sans-serif'],
+        },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
