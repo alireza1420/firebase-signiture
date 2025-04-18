@@ -18,104 +18,104 @@ export default function AdminDashboard() {
   const [field4Title, setField4Title] = useState("");
   const { toast } = useToast();
   const [formType, setFormType] = useState("text"); // 'text' or 'pdf'
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [pdfFileName, setPdfFileName] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfFileName, setPdfFileName] = useState<string | null>(null);
 
   const generateLink = () => {
-      let consentData;
+    let consentData;
 
-      if (formType === "text") {
-          consentData = consentForm;
-      } else if (formType === "pdf" && pdfFile) {
-          consentData = pdfFile.name;
-      } else {
-          toast({
-              title: "Error",
-              description: "Please select consent form type and provide the consent form data.",
-          });
-          return;
-      }
+    if (formType === "text") {
+      consentData = consentForm;
+    } else if (formType === "pdf" && pdfFile) {
+      consentData = pdfFile.name;
+    } else {
+      toast({
+        title: "Error",
+        description: "Please select consent form type and provide the consent form data.",
+      });
+      return;
+    }
 
     // Generate a unique link (UUID)
     const uuid = crypto.randomUUID();
     setLink(`${window.location.origin}/form/${uuid}`);
-      toast({
-          title: "Link Generated",
-          description: "Successfully generated a unique link for the consent form.",
-      });
+    toast({
+      title: "Link Generated",
+      description: "Successfully generated a unique link for the consent form.",
+    });
   };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && file.type === "application/pdf") {
-            setPdfFile(file);
-            setPdfFileName(file.name);
-            setConsentForm(""); // Clear text area if PDF is uploaded
-        } else {
-            setPdfFile(null);
-            setPdfFileName(null);
-            toast({
-                title: "Error",
-                description: "Please upload a valid PDF file.",
-            });
-        }
-    };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setPdfFile(file);
+      setPdfFileName(file.name);
+      setConsentForm(""); // Clear text area if PDF is uploaded
+    } else {
+      setPdfFile(null);
+      setPdfFileName(null);
+      toast({
+        title: "Error",
+        description: "Please upload a valid PDF file.",
+      });
+    }
+  };
 
 
   return (
     <div className="flex justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle>Admin Dashboard</CardTitle>
+          <CardTitle>Create Consent Form</CardTitle>
           <CardDescription>
             Manage consent forms and generate secure links.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
 
+          <div className="grid gap-2">
+            <Label>Consent Form Type</Label>
+            <RadioGroup defaultValue="text" className="flex flex-col space-y-1" onValueChange={(value) => {
+              setFormType(value);
+              if (value === "pdf") {
+                setConsentForm("");
+              }
+            }}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="text" id="text" />
+                <Label htmlFor="text">Text</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pdf" id="pdf" />
+                <Label htmlFor="pdf">PDF</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {formType === "text" && (
             <div className="grid gap-2">
-                <Label>Consent Form Type</Label>
-                <RadioGroup defaultValue="text" className="flex flex-col space-y-1" onValueChange={(value) => {
-                    setFormType(value);
-                    if (value === "pdf") {
-                        setConsentForm("");
-                    }
-                }}>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="text" id="text"/>
-                        <Label htmlFor="text">Text</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="pdf" id="pdf"/>
-                        <Label htmlFor="pdf">PDF</Label>
-                    </div>
-                </RadioGroup>
+              <label htmlFor="consentForm">Consent Form Text</label>
+              <Textarea
+                id="consentForm"
+                placeholder="Paste consent form text here..."
+                value={consentForm}
+                onChange={(e) => setConsentForm(e.target.value)}
+              />
             </div>
+          )}
 
-            {formType === "text" && (
-                <div className="grid gap-2">
-                    <label htmlFor="consentForm">Consent Form Text</label>
-                    <Textarea
-                        id="consentForm"
-                        placeholder="Paste consent form text here..."
-                        value={consentForm}
-                        onChange={(e) => setConsentForm(e.target.value)}
-                    />
-                </div>
-            )}
-
-            {formType === "pdf" && (
-                <div className="grid gap-2">
-                    <label htmlFor="pdfUpload">Upload PDF Consent Form</label>
-                    <Input
-                        type="file"
-                        id="pdfUpload"
-                        accept="application/pdf"
-                        onChange={handleFileChange}
-                    />
-                    {pdfFileName && <p>Selected File: {pdfFileName}</p>}
-                </div>
-            )}
+          {formType === "pdf" && (
+            <div className="grid gap-2">
+              <label htmlFor="pdfUpload">Upload PDF Consent Form</label>
+              <Input
+                type="file"
+                id="pdfUpload"
+                accept="application/pdf"
+                onChange={handleFileChange}
+              />
+              {pdfFileName && <p>Selected File: {pdfFileName}</p>}
+            </div>
+          )}
 
 
           <div className="grid grid-cols-2 gap-4">
