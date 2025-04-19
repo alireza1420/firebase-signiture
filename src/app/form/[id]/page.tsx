@@ -45,7 +45,7 @@ export default function ConsentForm({ params }: { params: { id: string } }) {
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="field1">Field 1</label>
+              <label htmlFor="field1">{formData.field1}</label>
               <Input
                 type="text"
                 id="field1"

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { db } from "@/lib/firebase"; // Import Firebase Firestore
 import { collection, addDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { Link } from "lucide-react";
 
 interface FormData {
   formName: string;
@@ -38,6 +39,8 @@ export default function AdminDashboard() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [link, setLink] = useState("");
+  const [formValidation, setFormValidation]=useState()
   const router = useRouter();
 
   useEffect(() => {
@@ -80,6 +83,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const generateLink = () => {
+    if (!checkFormValidation()) {
+      return;
+    }
+    // Generate a unique link (UUID)
+    const uuid = crypto.randomUUID();
+    setLink(`${window.location.origin}/form/${uuid}`);
+      toast({
+          title: "Link Generated",
+          description: "Successfully generated a unique link for the consent form.",
+      });
+  };
+  
+  const checkFormValidation = () => {
+    const { formName, consentForm, field1Title, field2Title, field3Title, field4Title } = formData;
+    if (!formName || !consentForm || !field1Title || !field2Title || !field3Title || !field4Title) {
+      setFormValidation(false);
+      return false;
+    }
+    setFormValidation(true);
+    return true;
+  }
+
   const generateForm = async () => {
     let consentData;
 
@@ -111,7 +137,7 @@ export default function AdminDashboard() {
       field4Title: formData.field4Title,
       formType: formData.formType,
       pdfFileName: formData.pdfFileName,
-      formURL: formURL,
+      formURL: link,
       createdAt: new Date(),
     };
 
@@ -228,6 +254,18 @@ export default function AdminDashboard() {
             </div>
           </div>
           <Button onClick={generateForm}>Generate Form</Button>
+          <Button onClick={generateLink}>Create Link</Button>
+          {link && (
+            <div className="grid gap-2">
+              <label htmlFor="link">Generated Link</label>
+              <Input
+                type="text"
+                id="link"
+                value={link}
+                readOnly
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
