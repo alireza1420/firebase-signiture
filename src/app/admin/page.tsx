@@ -96,35 +96,34 @@ export default function AdminDashboard() {
     }
 
     // Generate a unique id (UUID)
-    const uuid = crypto.randomUUID();
-    const formURL = `/form/${uuid}`;
-
+        const uuid = crypto.randomUUID();
+        const formURL = `/form/${uuid}`;
+    
+    const formContent = formData.consentForm;
     // Save form data to Firestore
-    try {
-      const formsCollection = collection(db, "consentForms");
-      const formDataToSave = {
-        ...formData,
-        formURL: formURL,
-        createdAt: new Date().toISOString(), // Convert Date to ISO string
-      };
+    const formsCollection = collection(db, "consentForms");
+    const formDataToSave = {
+      formName: formData.formName,
+      consentForm: consentData, // Ensure correct data is saved
+      field1Title: formData.field1Title,
+      field2Title: formData.field2Title,
+      field3Title: formData.field3Title,
+      field4Title: formData.field4Title,
+      formType: formData.formType,
+      pdfFileName: formData.pdfFileName,
+      formURL: formURL,
+      createdAt: new Date(),
+    };
 
-      await addDoc(formsCollection, formDataToSave);
+    await addDoc(formsCollection, formDataToSave);
 
-      toast({
-        title: "Form Saved",
-        description: "Consent form data saved successfully.",
-      });
+    toast({
+      title: "Form Saved",
+      description: "Consent form data saved successfully.",
+    });
 
-      // Redirect to the new form
-      router.push(formURL);
-
-    } catch (error) {
-      console.error("Error saving form data to Firestore:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save consent form data.",
-      });
-    }
+    // Redirect to the new form
+    router.push(formURL);
   };
 
   return (
